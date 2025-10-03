@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { capturegemQueries } from '@/lib/api/capturegem-client';
 import { DashboardSummary } from '@/components/dashboard/dashboard-summary';
 import { ModelGrid } from '@/components/models/model-grid';
-import { FilterBar } from '@/components/filters/filter-bar';
+import { AdvancedFilterPanel } from '@/components/filters/advanced-filter-panel';
 import { ModelDetailModal } from '@/components/models/model-detail-modal';
 import { LoadingSkeleton, DashboardLoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { useState, useMemo } from 'react';
@@ -18,9 +18,9 @@ import { applyFilters } from '@/lib/utils/filter-utils';
 
 export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedRating, setSelectedRating] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'overall' | 'value' | 'recent' | 'recordings'>('overall');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<string>('overall');
   const [showProspectsOnly, setShowProspectsOnly] = useState(false);
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
 
@@ -45,13 +45,23 @@ export default function DashboardPage() {
     const filterState: FilterState = {
       search: searchQuery || undefined,
       rating: selectedRating as any,
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
       prospect: showProspectsOnly || undefined,
       sort: sortBy as any,
       order: 'desc',
     };
     
     return applyFilters(allModels, filterState);
-  }, [allModels, searchQuery, selectedRating, showProspectsOnly, sortBy]);
+  }, [allModels, searchQuery, selectedRating, selectedTags, showProspectsOnly, sortBy]);
+
+  // Extract available tags from all models
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    allModels.forEach(model => {
+      model.tags.forEach(tag => tagSet.add(tag));
+    });
+    return Array.from(tagSet).sort();
+  }, [allModels]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -79,17 +89,19 @@ export default function DashboardPage() {
 
         {/* Filters */}
         <section>
-          <FilterBar
+          <AdvancedFilterPanel
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            selectedStatus={selectedStatus}
-            onStatusChange={setSelectedStatus}
             selectedRating={selectedRating}
             onRatingChange={setSelectedRating}
+            selectedTags={selectedTags}
+            onTagsChange={setSelectedTags}
             sortBy={sortBy}
             onSortChange={setSortBy}
             showProspectsOnly={showProspectsOnly}
             onProspectsToggle={setShowProspectsOnly}
+            availableTags={availableTags}
+            modelCount={models.length}
           />
         </section>
 

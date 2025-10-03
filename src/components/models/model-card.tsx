@@ -1,6 +1,8 @@
 "use client"
 
+import { memo } from 'react'
 import type { Model } from "@/lib/types/capturegem"
+import { LazyImage } from '../ui/lazy-image'
 import {
   ratingToScore,
   ratingToColor,
@@ -18,7 +20,7 @@ interface ModelCardProps {
   onClick?: () => void
 }
 
-export function ModelCard({ model, onClick }: ModelCardProps) {
+export const ModelCard = memo(function ModelCard({ model, onClick }: ModelCardProps) {
   const enriched = model.enrichedProfile
   const pvtRate = model.pricing.pvt_rate || 0
   const valueScore = calculateValueScore(pvtRate, model.ratings.overall)
@@ -61,13 +63,11 @@ export function ModelCard({ model, onClick }: ModelCardProps) {
       <div className="mb-3 flex items-start gap-3">
         {/* Avatar */}
         <div className="relative">
-          <div className="h-16 w-16 overflow-hidden rounded-xl bg-zinc-800 ring-2 ring-zinc-700">
-            <img
-              src={enriched?.avatarUrl || "/placeholder.svg"}
-              alt={model.displayName || model.username}
-              className="h-full w-full object-cover"
-            />
-          </div>
+          <LazyImage
+            src={enriched?.avatarUrl || "/placeholder.svg"}
+            alt={model.displayName || model.username}
+            className="h-16 w-16 rounded-xl ring-2 ring-zinc-700"
+          />
         </div>
 
         {/* Name & Info */}
@@ -186,4 +186,4 @@ export function ModelCard({ model, onClick }: ModelCardProps) {
       </div>
     </div>
   )
-}
+})
