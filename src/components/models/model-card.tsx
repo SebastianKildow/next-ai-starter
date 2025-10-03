@@ -1,6 +1,6 @@
 "use client"
 
-import type { Model } from "@/types/model"
+import type { Model } from "@/lib/types/capturegem"
 import {
   ratingToScore,
   ratingToColor,
@@ -63,21 +63,11 @@ export function ModelCard({ model, onClick }: ModelCardProps) {
         <div className="relative">
           <div className="h-16 w-16 overflow-hidden rounded-xl bg-zinc-800 ring-2 ring-zinc-700">
             <img
-              src={enriched?.avatarUrl || model.avatar || "/placeholder.svg"}
+              src={enriched?.avatarUrl || "/placeholder.svg"}
               alt={model.displayName || model.username}
               className="h-full w-full object-cover"
             />
           </div>
-          {/* Status Indicator */}
-          {model.status && (
-            <div
-              className={cn(
-                "absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-zinc-900",
-                STATUS_COLORS[model.status],
-              )}
-              aria-label={STATUS_LABELS[model.status]}
-            />
-          )}
         </div>
 
         {/* Name & Info */}
@@ -186,17 +176,13 @@ export function ModelCard({ model, onClick }: ModelCardProps) {
 
       {/* Footer */}
       <div className="flex items-center justify-between border-t border-zinc-700/50 pt-2 text-xs">
-        <div className="flex items-center gap-2">
-          {model.status && (
-            <span className={cn("font-medium", model.status === "online" ? "text-green-400" : "text-zinc-500")}>
-              {STATUS_LABELS[model.status]}
-            </span>
-          )}
-        </div>
         <div className="flex items-center gap-2 text-zinc-400">
           <Video className="h-3 w-3" />
-          <span className="font-mono">{model.recordings}</span>
+          <span className="font-mono">{model.recordings} recordings</span>
         </div>
+        {model.autoRecord && (
+          <span className="text-green-400 text-xs font-medium">AUTO-RECORD ✓</span>
+        )}
       </div>
     </div>
   )

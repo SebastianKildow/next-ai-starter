@@ -2,7 +2,9 @@
 
 import { Search } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { SortOption } from "@/types/model"
+
+// Define SortOption locally as it's specific to the UI
+type SortOption = "overall" | "value" | "recent" | "recordings"
 
 interface FilterBarProps {
   searchQuery: string

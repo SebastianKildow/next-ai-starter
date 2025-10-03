@@ -1,52 +1,32 @@
-import type { Model } from "@/types/model"
-import { mockModels } from "@/lib/api/models"
+/**
+ * DEPRECATED: This file is deprecated.
+ * Use src/lib/api/capturegem-client.ts for all API calls.
+ * 
+ * This file is kept for backward compatibility during migration.
+ * All functions now proxy to capturegem-client.
+ */
+
+import type { Model } from "@/lib/types/capturegem"
+import { fetchModels as fetchModelsAPI, fetchModel } from "./capturegem-client"
 
 /**
- * Simulates fetching all models from the API
- * In production, this would be a real API call
+ * Fetches all models from the API
+ * @deprecated Use fetchModels() from capturegem-client directly
  */
 export async function fetchModels(): Promise<Model[]> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  return mockModels
+  const response = await fetchModelsAPI({ limit: 1000 })
+  return response.data
 }
 
 /**
- * Simulates fetching a single model by ID
+ * Fetches a single model by username
+ * @deprecated Use fetchModel() from capturegem-client directly
  */
-export async function fetchModelById(id: string): Promise<Model | null> {
-  await new Promise((resolve) => setTimeout(resolve, 50))
-  return mockModels.find((model) => model.id === id) || null
-}
-
-/**
- * Simulates updating a model's favorite status
- */
-export async function toggleModelFavorite(id: string): Promise<Model | null> {
-  await new Promise((resolve) => setTimeout(resolve, 50))
-  const model = mockModels.find((m) => m.id === id)
-  if (model) {
-    model.isFavorite = !model.isFavorite
-    return model
+export async function fetchModelById(username: string): Promise<Model | null> {
+  try {
+    return await fetchModel(username)
+  } catch (error) {
+    console.error(`Failed to fetch model ${username}:`, error)
+    return null
   }
-  return null
-}
-
-/**
- * Simulates adding a note to a model
- */
-export async function addModelNote(id: string, content: string, tags?: string[]): Promise<Model | null> {
-  await new Promise((resolve) => setTimeout(resolve, 50))
-  const model = mockModels.find((m) => m.id === id)
-  if (model) {
-    model.notes.push({
-      id: `n${Date.now()}`,
-      content,
-      timestamp: new Date().toISOString(),
-      source: "manual",
-      tags,
-    })
-    return model
-  }
-  return null
 }

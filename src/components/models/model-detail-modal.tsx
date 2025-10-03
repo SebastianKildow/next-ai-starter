@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import type { Model } from "@/types/model"
+import type { Model } from "@/lib/types/capturegem"
 import { X, DollarSign, Video, Clock, Star, Tag, MessageSquare } from "lucide-react"
 import { ratingToColor, ratingToBgColor, ratingToScore } from "@/lib/rating-utils"
 import { cn } from "@/lib/utils"
@@ -56,7 +56,7 @@ export function ModelDetailModal({ model, onClose }: ModelDetailModalProps) {
         <div className="mb-6 flex items-start gap-4">
           <div className="h-24 w-24 overflow-hidden rounded-xl bg-zinc-800 ring-2 ring-zinc-700">
             <img
-              src={enriched?.avatarUrl || model.avatar || "/placeholder.svg"}
+              src={enriched?.avatarUrl || "/placeholder.svg"}
               alt={model.displayName || model.username}
               className="h-full w-full object-cover"
             />

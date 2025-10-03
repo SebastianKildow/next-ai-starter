@@ -1,6 +1,6 @@
 "use client"
 
-import type { DashboardSummary as DashboardSummaryType } from "@/types/model"
+import type { DashboardSummary as DashboardSummaryType } from "@/lib/types/capturegem"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { TrendingUp, Users, DollarSign, Video } from "lucide-react"
 

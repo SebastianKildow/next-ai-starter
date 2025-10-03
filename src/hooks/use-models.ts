@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import type { Model } from "@/types/model"
-import type { FilterState } from "@/types/filters"
+import type { Model, FilterState } from "@/lib/types/capturegem"
 import { fetchModels } from "@/lib/api/models"
 import { filterModels, sortModels } from "@/lib/utils/filter-utils"
 
@@ -34,7 +33,9 @@ export function useModels(filters: FilterState) {
   // Apply filters and sorting
   const filteredModels = useMemo(() => {
     let result = filterModels(models, filters)
-    result = sortModels(result, filters.sortBy)
+    if (filters.sort) {
+      result = sortModels(result, filters.sort as any, filters.order)
+    }
     return result
   }, [models, filters])
 

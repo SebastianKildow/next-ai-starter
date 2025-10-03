@@ -7,30 +7,33 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { capturegemQueries } from '@/lib/api/capturegem-client';
-import { DashboardSummary } from '@/components/capturegem/DashboardSummary';
-import { ModelGrid } from '@/components/capturegem/ModelGrid';
-import { FilterBar } from '@/components/capturegem/FilterBar';
+import { DashboardSummary } from '@/components/dashboard/dashboard-summary';
+import { ModelGrid } from '@/components/models/model-grid';
+import { FilterBar } from '@/components/filters/filter-bar';
+import { ModelDetailModal } from '@/components/models/model-detail-modal';
 import { useState } from 'react';
-import type { FilterState } from '@/lib/types/capturegem';
+import type { FilterState, Model } from '@/lib/types/capturegem';
 
 export default function DashboardPage() {
-  const [filters, setFilters] = useState<FilterState>({
-    limit: 50,
-    sort: 'rating',
-    order: 'desc',
-  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedRating, setSelectedRating] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'overall' | 'value' | 'recent' | 'recordings'>('overall');
+  const [showProspectsOnly, setShowProspectsOnly] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
 
   // Fetch dashboard summary
   const { data: summaryData, isLoading: summaryLoading } = useQuery(
     capturegemQueries.analyticsSummary()
   );
 
-  // Fetch model cards
-  const { data: cardsData, isLoading: cardsLoading } = useQuery(
-    capturegemQueries.modelCards()
+  // Fetch models
+  const { data: modelsResponse, isLoading: modelsLoading } = useQuery(
+    capturegemQueries.models({ limit: 100, sort: 'rating', order: 'desc' })
   );
 
-  const isLoading = summaryLoading || cardsLoading;
+  const models = modelsResponse?.data || [];
+  const isLoading = summaryLoading || modelsLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -58,9 +61,16 @@ export default function DashboardPage() {
         {/* Filters */}
         <section>
           <FilterBar
-            onFilterChange={setFilters}
-            availableTags={[]}
-            availableRatings={['S++', 'S+', 'S', 'A+', 'A', 'B', 'C', 'D']}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedStatus={selectedStatus}
+            onStatusChange={setSelectedStatus}
+            selectedRating={selectedRating}
+            onRatingChange={setSelectedRating}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            showProspectsOnly={showProspectsOnly}
+            onProspectsToggle={setShowProspectsOnly}
           />
         </section>
 
@@ -72,8 +82,17 @@ export default function DashboardPage() {
             </div>
           )}
           
-          {cardsData && !isLoading && (
-            <ModelGrid cards={cardsData.cards} />
+          {!isLoading && models.length > 0 && (
+            <ModelGrid 
+              models={models}
+              onModelClick={(model) => setSelectedModel(model)}
+            />
+          )}
+          
+          {!isLoading && models.length === 0 && (
+            <div className="text-center py-12 text-gray-400">
+              <p>No models found. Try adjusting your filters.</p>
+            </div>
           )}
         </section>
       </main>
@@ -84,6 +103,14 @@ export default function DashboardPage() {
           <p>CaptureGem Dashboard • {summaryData?.totalModels || 0} Models Tracked</p>
         </div>
       </footer>
+      
+      {/* Model Detail Modal */}
+      {selectedModel && (
+        <ModelDetailModal
+          model={selectedModel}
+          onClose={() => setSelectedModel(null)}
+        />
+      )}
     </div>
   );
 }

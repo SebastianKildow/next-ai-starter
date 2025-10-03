@@ -1,4 +1,4 @@
-import type { RatingTier } from "@/types/model"
+import type { RatingTier } from "@/lib/types/capturegem"
 
 /**
  * Converts a rating tier to a numeric score (0-100)

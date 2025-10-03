@@ -1,8 +1,14 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import type { FilterState, SortOption, ModelStatus, RatingTier } from "@/types/filters"
-import { DEFAULT_FILTERS } from "@/lib/constants"
+import type { FilterState, RatingTier } from "@/lib/types/capturegem"
+
+// Default filters
+const DEFAULT_FILTERS: FilterState = {
+  limit: 50,
+  sort: 'rating',
+  order: 'desc',
+}
 
 /**
  * Custom hook for managing filter state
@@ -21,29 +27,29 @@ export function useFilters(initialFilters: FilterState = DEFAULT_FILTERS) {
     [updateFilter],
   )
 
-  const setStatus = useCallback(
-    (status: ModelStatus | "all") => {
-      updateFilter("status", status)
+  const setRating = useCallback(
+    (rating: RatingTier | undefined) => {
+      updateFilter("rating", rating)
     },
     [updateFilter],
   )
 
-  const setRatingTier = useCallback(
-    (tier: RatingTier | "all") => {
-      updateFilter("ratingTier", tier)
+  const setTags = useCallback(
+    (tags: string[]) => {
+      updateFilter("tags", tags)
     },
     [updateFilter],
   )
 
-  const setSortBy = useCallback(
-    (sortBy: SortOption) => {
-      updateFilter("sortBy", sortBy)
+  const setSort = useCallback(
+    (sort: FilterState['sort']) => {
+      updateFilter("sort", sort)
     },
     [updateFilter],
   )
 
   const toggleProspects = useCallback(() => {
-    setFilters((prev) => ({ ...prev, showProspects: !prev.showProspects }))
+    setFilters((prev) => ({ ...prev, prospect: !prev.prospect }))
   }, [])
 
   const resetFilters = useCallback(() => {
@@ -53,9 +59,9 @@ export function useFilters(initialFilters: FilterState = DEFAULT_FILTERS) {
   return {
     filters,
     setSearch,
-    setStatus,
-    setRatingTier,
-    setSortBy,
+    setRating,
+    setTags,
+    setSort,
     toggleProspects,
     resetFilters,
     updateFilter,
