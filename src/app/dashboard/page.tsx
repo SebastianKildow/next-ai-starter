@@ -11,8 +11,10 @@ import { DashboardSummary } from '@/components/dashboard/dashboard-summary';
 import { ModelGrid } from '@/components/models/model-grid';
 import { FilterBar } from '@/components/filters/filter-bar';
 import { ModelDetailModal } from '@/components/models/model-detail-modal';
-import { useState } from 'react';
+import { LoadingSkeleton, DashboardLoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { useState, useMemo } from 'react';
 import type { FilterState, Model } from '@/lib/types/capturegem';
+import { applyFilters } from '@/lib/utils/filter-utils';
 
 export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,8 +34,24 @@ export default function DashboardPage() {
     capturegemQueries.models({ limit: 100, sort: 'rating', order: 'desc' })
   );
 
-  const models = modelsResponse?.data || [];
+  const allModels = modelsResponse?.data || [];
   const isLoading = summaryLoading || modelsLoading;
+
+  // Apply client-side filtering
+  const models = useMemo(() => {
+    if (!allModels.length) return [];
+    
+    // Build filter state from UI state
+    const filterState: FilterState = {
+      search: searchQuery || undefined,
+      rating: selectedRating as any,
+      prospect: showProspectsOnly || undefined,
+      sort: sortBy as any,
+      order: 'desc',
+    };
+    
+    return applyFilters(allModels, filterState);
+  }, [allModels, searchQuery, selectedRating, showProspectsOnly, sortBy]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -52,11 +70,12 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 space-y-8">
         {/* Dashboard Summary */}
-        {summaryData && (
-          <section>
+        <section>
+          {summaryLoading && <DashboardLoadingSkeleton />}
+          {summaryData && !summaryLoading && (
             <DashboardSummary summary={summaryData} />
-          </section>
-        )}
+          )}
+        </section>
 
         {/* Filters */}
         <section>
@@ -76,20 +95,16 @@ export default function DashboardPage() {
 
         {/* Model Grid */}
         <section>
-          {isLoading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-            </div>
-          )}
+          {modelsLoading && <LoadingSkeleton count={6} />}
           
-          {!isLoading && models.length > 0 && (
+          {!modelsLoading && models.length > 0 && (
             <ModelGrid 
               models={models}
               onModelClick={(model) => setSelectedModel(model)}
             />
           )}
           
-          {!isLoading && models.length === 0 && (
+          {!modelsLoading && models.length === 0 && (
             <div className="text-center py-12 text-gray-400">
               <p>No models found. Try adjusting your filters.</p>
             </div>
